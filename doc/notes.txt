@@ -1,0 +1,38 @@
+NOTES
+Some notes created while developing the timelog
+
+HELP MENU
+h - help (this message)
+rd - report for past day
+r - report menu
+p TheName - set project name
+p - without a project name will print the current project
+pl - list known projects
+q - quits application
+anything else - inserts an entry
+
+REPORTS MENU
+d - Report for past day (rd from input mode)
+w - Report for week
+c - Custom report
+
+INPUT MODE (main mode)
+Enter h for help
+Current Project: projectName
+> h
+(shows help menu)
+> start working on main menu
+(inserts into db)
+> Just delete the database used by this program
+(in red) ERROR: unable to write to file
+> Put database back
+(inserts into db)
+> q
+GoodBye
+
+DATABASE SCHEMA
+[timelog]
+id INTEGER PRIMARY KEY AUTOINCREMENT
+created_at 
+project
+note
