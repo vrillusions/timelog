@@ -25,6 +25,19 @@ def usage():
 	print ' -h  This help message'
 
 
+def initDatabase(db):
+	"""Initializes the database."""
+	conn = sqlite3.connect(db)
+	c = conn.cursor()
+	c.execute('''create table if not exists timelog
+		(id integer primary key autoincrement, 
+		project text,
+		created_at text default CURRENT_TIMESTAMP,
+		note text)''')
+	conn.commit()
+	c.close()
+
+
 def main():
 	"""The main function."""
 	args = sys.argv[1:]
@@ -34,10 +47,21 @@ def main():
 	# rest of code here
 	config = ConfigParser.ConfigParser()
 	config.read('./options.cfg')
-	print config.get('main', 'database')
-	print config.get('main', 'default project')
-	
-	print "hello world!"
+	databaseName = config.get('main', 'database')
+	project = config.get('main', 'default project')
+	if os.path.isfile(databaseName) == False:
+		print ansioutput.fuscia('Database not found, initializing...')
+		initDatabase(databaseName)
+	conn = sqlite3.connect(databaseName)
+	c = conn.cursor()
+	t = (project,'Did something that was really important')
+	c.execute('insert into timelog (project, note) values (?, ?)', t)
+	conn.commit()
+	#c.execute('select * from timelog')
+	#for row in c:
+	#	print row
+	c.close()
+	print "done"
 
 
 if __name__ == "__main__":
