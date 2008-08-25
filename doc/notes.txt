@@ -33,6 +33,23 @@ GoodBye
 DATABASE SCHEMA
 [timelog]
 id INTEGER PRIMARY KEY AUTOINCREMENT
-created_at 
+created_at (keep in mind that by default times are stored in sqlite databases as UTC)
 project
 note
+
+
+PSEUDOCODE
+
+checkForCommandLineOptions()
+getConfigSettings()
+checkDatabase()
+    if db not found then initDatabase()
+print "main screen, enter h for help or enter log"
+print "current project: " + projectName
+mainMenu()
+    prompt for user input
+    checkUserInput()
+        checkForCommands()
+        else
+        insertIntoDb()
+    go to mainMenu() 
