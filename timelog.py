@@ -19,6 +19,13 @@ import sqlite3
 import ansioutput
 
 
+def gb():
+    """Global variables."""
+    gb.conn = ''
+    gb.c = ''
+    gb.project = ''
+
+
 def usage():
     """Usage information (called with -h option)."""
     print "Usage:  %s" % os.path.basename(sys.argv[0])
@@ -38,6 +45,43 @@ def initDatabase(db):
     c.close()
 
 
+def getCurrentProject():
+    """Retrieves and formats the project name"""
+    return ansioutput.darkgreen('Current project: ') + ansioutput.green(gb.project)
+
+
+def processUserInput():
+    """Takes the user input and processes it"""
+    msg = raw_input('timelog> ')
+    # todo: check a dict instead
+    if msg == 'h':
+        print "sorry no help available yet"
+    elif msg == 'q':
+        return True
+    elif msg == 'r':
+        gb.c.execute("""select datetime(created_at, 'localtime') as created_at_local,
+            project, note from timelog""")
+        for row in gb.c:
+            print '%s : %-12s : %s' % row
+    elif msg == 'p':
+        print getCurrentProject()
+    elif msg.startswith('p ') == True:
+        # drop first two characters and set rest to project name
+        gb.project = msg[2:]
+        print getCurrentProject()
+    else:
+        t = (gb.project, msg)
+        gb.c.execute('insert into timelog (project, note) values (?, ?)', t)
+        gb.conn.commit()
+    processUserInput()
+
+
+def doCleanup():
+    """Cleanup functions to run before exiting"""
+    gb.conn.commit()
+    gb.c.close()
+
+
 def main():
     """The main function."""
     args = sys.argv[1:]
@@ -48,20 +92,19 @@ def main():
     config = ConfigParser.ConfigParser()
     config.read('./options.cfg')
     databaseName = config.get('main', 'database')
-    project = config.get('main', 'default project')
+    gb.project = config.get('main', 'default project')
     if os.path.isfile(databaseName) == False:
         print ansioutput.fuscia('Database not found, initializing...')
         initDatabase(databaseName)
-    conn = sqlite3.connect(databaseName)
-    c = conn.cursor()
-    t = (project,'Did something that was really important')
-    c.execute('insert into timelog (project, note) values (?, ?)', t)
-    conn.commit()
-    #c.execute('select * from timelog')
-    #for row in c:
-    #    print row
-    c.close()
-    print "done"
+    gb.conn = sqlite3.connect(databaseName)
+    gb.c = gb.conn.cursor()
+    print getCurrentProject()
+    print ansioutput.turquoise('Main Menu')
+    print ansioutput.teal('Enter h for help or enter note')
+    processUserInput()
+    # if we're here then user pressed q to quit
+    doCleanup()
+    print "goodbye"
 
 
 if __name__ == "__main__":
@@ -69,10 +112,15 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt, e:
         # Ctrl-c
-        raise e
+        doCleanup()
+        # need an extra line break
+        print
+        print "User requested shutdown. Please consider using the q option instead"
+        sys.exit(0)
     except SystemExit, e:
         # sys.exit()
-        raise e
+        doCleanup()
+        sys.exit(0)
     except Exception, e:
         print "ERROR, UNEXPECTED EXCEPTION"
         print str(e)
