@@ -55,7 +55,14 @@ def processUserInput():
     msg = raw_input('timelog> ')
     # todo: check a dict instead
     if msg == 'h':
-        print "sorry no help available yet"
+        print 'Use the following special keywords:'
+        print 'h - This help message'
+        print 'r - Show all entries'
+        print 'rp - List all known projects'
+        print 'p - Show current project name'
+        print 'p <project name> - Set a new project name'
+        print
+        print 'All other text will be considered a note'
     elif msg == 'q':
         return True
     elif msg == 'r':
@@ -63,6 +70,10 @@ def processUserInput():
             project, note from timelog""")
         for row in gb.c:
             print '%s : %-12s : %s' % row
+    elif msg == 'rp':
+        gb.c.execute("""select distinct project from timelog""")
+        for row in gb.c:
+            print '%s' % row
     elif msg == 'p':
         print getCurrentProject()
     elif msg.startswith('p ') == True:
