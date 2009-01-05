@@ -56,11 +56,13 @@ def processUserInput():
     # todo: check a dict instead
     if msg == 'h':
         print 'Use the following special keywords:'
-        print 'h - This help message'
-        print 'r - Show all entries'
+        print 'h  - This help message'
+        print 'r  - Show all entries'
+        print 'rd - Show all entries from today'
         print 'rp - List all known projects'
-        print 'p - Show current project name'
+        print 'p  - Show current project name'
         print 'p <project name> - Set a new project name'
+        print 'q  - Quit program'
         print
         print 'All other text will be considered a note'
     elif msg == 'q':
@@ -68,6 +70,12 @@ def processUserInput():
     elif msg == 'r':
         gb.c.execute("""select datetime(created_at, 'localtime') as created_at_local,
             project, note from timelog""")
+        for row in gb.c:
+            print '%s : %-12s : %s' % row
+    elif msg == 'rd':
+        gb.c.execute("""select datetime(created_at, 'localtime') as created_at_local,
+            project, note from timelog 
+            where date(created_at, 'localtime') like date('now', 'localtime')""")
         for row in gb.c:
             print '%s : %-12s : %s' % row
     elif msg == 'rp':
